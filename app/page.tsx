@@ -28,7 +28,7 @@ export default function HomePage() {
     { name: "PGU Impresión", logo: "/logos/PGU.png", scale: "scale-125 sm:scale-150" },
     { name: "Russos Part", logo: "/logos/russospart.png", scale: "scale-110 sm:scale-125" },
     { name: "Grill House", logo: "/logos/grillhouse.png", scale: "scale-110 sm:scale-125" },
-    { name: "Cerise", logo: "/logos/cerise.png", scale: "scale-90 sm:scale-95" },
+    { name: "Cerise", logo: "/logos/Cerise.png", scale: "scale-90 sm:scale-95" },
     { name: "Diez10", logo: "/logos/diez10.png", scale: "scale-125 sm:scale-150" },
     { name: "Consein", logo: "/logos/consein.png", scale: "scale-105 sm:scale-110" },
   ];
