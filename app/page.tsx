@@ -20,12 +20,12 @@ export default function HomePage() {
   // 12 logos con escala controlada para móvil y desktop sin desbordar pantalla
   const brands = [
     { name: "Elixir", logo: "/logos/elixir.png", scale: "scale-110 sm:scale-125" },
-    { name: "Fisio", logo: "/logos/fisio.png", scale: "scale-125 sm:scale-150" },
+    { name: "Fisio", logo: "/logos/Fisio.png", scale: "scale-125 sm:scale-150" },
     { name: "Eurobig", logo: "/logos/eurobig.png", scale: "scale-125 sm:scale-150" },
     { name: "Son Sabor Latino", logo: "/logos/sonsabor.png", scale: "scale-115 sm:scale-135" },
     { name: "Ferrexito", logo: "/logos/ferrexito.png", scale: "scale-125 sm:scale-150" },
     { name: "Mova", logo: "/logos/mova.png", scale: "scale-125 sm:scale-150" },
-    { name: "PGU Impresión", logo: "/logos/pgu.png", scale: "scale-125 sm:scale-150" },
+    { name: "PGU Impresión", logo: "/logos/PGU.png", scale: "scale-125 sm:scale-150" },
     { name: "Russos Part", logo: "/logos/russospart.png", scale: "scale-110 sm:scale-125" },
     { name: "Grill House", logo: "/logos/grillhouse.png", scale: "scale-110 sm:scale-125" },
     { name: "Cerise", logo: "/logos/cerise.png", scale: "scale-90 sm:scale-95" },
