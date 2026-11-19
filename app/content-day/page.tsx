@@ -291,7 +291,7 @@ export default function ContentDayPage() {
             Productora audiovisual y agencia de contenido estratégico para marcas, creadores y negocios que buscan liderar en redes sociales.
           </p>
           <div className="mt-12 pt-6 border-t border-white/5 w-full text-xs text-zinc-600">
-            © {new Date().getFullYear()} Ghost Productions. Todos los derechos reservados.
+            © 2026 Ghost Productions. Todos los derechos reservados.
           </div>
         </div>
       </footer>
