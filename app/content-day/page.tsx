@@ -12,35 +12,77 @@ import {
   Pause
 } from "lucide-react";
 
-function VerticalVideoCard({ src, label }: { src: string; label: string }) {
+function VerticalVideoCard({
+  src,
+  poster,
+  label,
+  isActive,
+  onActivate,
+}: {
+  src: string;
+  poster: string;
+  label: string;
+  isActive: boolean;
+  onActivate: () => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const togglePlay = () => {
+  const handleCardClick = () => {
+    if (!hasLoaded) {
+      setHasLoaded(true);
+      setIsPlaying(true);
+      onActivate();
+      return;
+    }
+
     if (!videoRef.current) return;
+
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
+      onActivate();
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
     }
   };
 
+  if (!isActive && isPlaying && videoRef.current && !videoRef.current.paused) {
+    videoRef.current.pause();
+    setIsPlaying(false);
+  }
+
   return (
     <div
-      onClick={togglePlay}
+      onClick={handleCardClick}
       className="aspect-[9/16] rounded-3xl bg-zinc-900 border border-white/15 hover:border-[#29ABE2]/50 overflow-hidden relative shadow-2xl flex items-center justify-center group cursor-pointer transition-all duration-300"
     >
-      <video
-        ref={videoRef}
-        src={src}
-        className="absolute inset-0 w-full h-full object-cover"
-        playsInline
-        loop
-        preload="metadata"
-        onEnded={() => setIsPlaying(false)}
-      />
+      {!hasLoaded ? (
+        <img
+          src={poster}
+          alt={label}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          src={src}
+          poster={poster}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          playsInline
+          loop
+          preload="none"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+        />
+      )}
+
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none" />
       <div
         className={`absolute inset-0 flex items-center justify-center z-20 pointer-events-none transition-opacity duration-300 ${
@@ -61,6 +103,7 @@ function VerticalVideoCard({ src, label }: { src: string; label: string }) {
 export default function ContentDayPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [activeVideoKey, setActiveVideoKey] = useState<string | null>(null);
 
   const painPoints = [
     {
@@ -110,16 +153,16 @@ export default function ContentDayPage() {
       {/* ================= HEADER / NAVBAR ================= */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/90 via-black/60 to-transparent backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center z-50" aria-label="Ir al inicio de Ghost Productions">
+          <Link href="/" prefetch={false} className="flex items-center z-50" aria-label="Ir al inicio de Ghost Productions">
             <img src="/logo.png" alt="Ghost Productions" className="h-9 sm:h-11 md:h-12 w-auto object-contain" />
           </Link>
 
           <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-8 text-sm font-semibold tracking-wider uppercase">
-            <Link href="/" className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">Home</Link>
-            <Link href="/content-day" className="text-white border-b-2 border-[#29ABE2] pb-1 transition-colors">Content Day</Link>
-            <Link href="/edicion" className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">Edición</Link>
-            <Link href="/portafolio" className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">Portafolio</Link>
-            <Link href="/contacto" className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">Contacto</Link>
+            <Link href="/" prefetch={false} className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">Home</Link>
+            <Link href="/content-day" prefetch={false} className="text-white border-b-2 border-[#29ABE2] pb-1 transition-colors">Content Day</Link>
+            <Link href="/edicion" prefetch={false} className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">Edición</Link>
+            <Link href="/portafolio" prefetch={false} className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">Portafolio</Link>
+            <Link href="/contacto" prefetch={false} className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">Contacto</Link>
           </nav>
 
           <button
@@ -135,11 +178,11 @@ export default function ContentDayPage() {
 
         {isMobileMenuOpen && (
           <nav aria-label="Menú móvil" className="md:hidden bg-[#141414]/98 backdrop-blur-xl border-b border-white/10 px-6 pt-4 pb-8 flex flex-col gap-5 text-center uppercase tracking-widest font-bold text-sm shadow-2xl">
-            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Home</Link>
-            <Link href="/content-day" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-[#29ABE2]">Content Day</Link>
-            <Link href="/edicion" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Edición</Link>
-            <Link href="/portafolio" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Portafolio</Link>
-            <Link href="/contacto" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Contacto</Link>
+            <Link href="/" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Home</Link>
+            <Link href="/content-day" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-[#29ABE2]">Content Day</Link>
+            <Link href="/edicion" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Edición</Link>
+            <Link href="/portafolio" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Portafolio</Link>
+            <Link href="/contacto" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Contacto</Link>
           </nav>
         )}
       </header>
@@ -228,8 +271,20 @@ export default function ContentDayPage() {
             </p>
 
             <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-3xl mx-auto">
-              <VerticalVideoCard src="/videos/content-1.mp4" label="Ejemplo Cliente 01" />
-              <VerticalVideoCard src="/videos/content-2.mp4" label="Ejemplo Cliente 02" />
+              <VerticalVideoCard
+                src="/videos/content-1.mp4"
+                poster="/thumbnails/content-1.jpg"
+                label="Ejemplo Cliente 01"
+                isActive={activeVideoKey === "content-1"}
+                onActivate={() => setActiveVideoKey("content-1")}
+              />
+              <VerticalVideoCard
+                src="/videos/content-2.mp4"
+                poster="/thumbnails/content-2.jpg"
+                label="Ejemplo Cliente 02"
+                isActive={activeVideoKey === "content-2"}
+                onActivate={() => setActiveVideoKey("content-2")}
+              />
             </div>
           </div>
         </section>
@@ -285,7 +340,7 @@ export default function ContentDayPage() {
       <footer className="py-14 px-5 sm:px-6 bg-[#141414] text-zinc-400 border-t border-white/5">
         <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
           <div className="mb-5">
-            <img src="/logo.png" alt="Ghost Productions" className="h-9 sm:h-10 w-auto object-contain mx-auto" />
+            <img src="/logo.png" alt="Ghost Productions" loading="lazy" className="h-9 sm:h-10 w-auto object-contain mx-auto" />
           </div>
           <p className="text-xs sm:text-sm text-zinc-400 max-w-md leading-relaxed px-2">
             Productora audiovisual y agencia de contenido estratégico para marcas, creadores y negocios que buscan liderar en redes sociales.
