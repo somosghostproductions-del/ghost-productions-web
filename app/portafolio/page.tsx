@@ -11,39 +11,93 @@ import {
   MessageCircle
 } from "lucide-react";
 
-// Subcomponente para cada tarjeta de video vertical (9:16) con reproducción real
-function VerticalVideoCard({ src, title }: { src: string; title: string }) {
+interface VideoItem {
+  id: number;
+  title: string;
+  src: string;
+  poster?: string;
+}
+
+// Subcomponente ultra-ligero: NO descarga ni 1 byte de video hasta que el usuario hace clic
+function VerticalVideoCard({
+  video,
+  isActive,
+  onActivate,
+}: {
+  video: VideoItem;
+  isActive: boolean;
+  onActivate: () => void;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const togglePlay = () => {
+  const handleCardClick = () => {
+    // Primer clic: monta el <video> por primera vez y lo reproduce
+    if (!hasLoaded) {
+      setHasLoaded(true);
+      setIsPlaying(true);
+      onActivate();
+      return;
+    }
+
     if (!videoRef.current) return;
+
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
+      onActivate();
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
     }
   };
 
+  // Si otro video empieza a reproducirse, pausamos este automáticamente
+  if (!isActive && isPlaying && videoRef.current && !videoRef.current.paused) {
+    videoRef.current.pause();
+    setIsPlaying(false);
+  }
+
   return (
     <div
-      onClick={togglePlay}
+      onClick={handleCardClick}
       className="aspect-[9/16] rounded-3xl bg-zinc-900 border border-white/10 hover:border-[#29ABE2]/50 overflow-hidden relative shadow-2xl flex flex-col justify-end p-5 group transition-all duration-300 cursor-pointer"
     >
-      <video
-        ref={videoRef}
-        src={src}
-        className="absolute inset-0 w-full h-full object-cover"
-        playsInline
-        loop
-        preload="metadata"
-        onEnded={() => setIsPlaying(false)}
-      />
+      {!hasLoaded ? (
+        /* FACHADA ESTÁTICA: Solo carga una imagen JPG ligera (~50 KB) o el fondo oscuro */
+        <>
+          {video.poster ? (
+            <img
+              src={video.poster}
+              alt={video.title}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-zinc-800/80 via-zinc-900 to-black" />
+          )}
+        </>
+      ) : (
+        /* REPRODUCTOR REAL: Solo existe en el DOM después del clic */
+        <video
+          ref={videoRef}
+          src={video.src}
+          poster={video.poster}
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          playsInline
+          loop
+          preload="none"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+        />
+      )}
 
       {/* Degradado oscuro inferior */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent z-10 pointer-events-none" />
 
       {/* Botón central Play / Pause */}
       <div
@@ -62,7 +116,7 @@ function VerticalVideoCard({ src, title }: { src: string; title: string }) {
 
       {/* Título inferior */}
       <div className="relative z-20 flex items-center justify-between text-xs font-semibold text-zinc-200 pointer-events-none">
-        <span className="truncate pr-2">{title}</span>
+        <span className="truncate pr-2">{video.title}</span>
         <span className="text-[#29ABE2] font-bold uppercase tracking-wider text-[10px] shrink-0">
           {isPlaying ? "Pausar" : "Ver"}
         </span>
@@ -73,16 +127,18 @@ function VerticalVideoCard({ src, title }: { src: string; title: string }) {
 
 export default function PortafolioPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeVideoKey, setActiveVideoKey] = useState<string | null>(null);
 
-  // 1. LISTA DE VIDEOS DE REDES SOCIALES (Ajusta los nombres a tus archivos en public/videos/)
-  const socialVideos = [
-    { id: 1, title: "Caso Redes 01", src: "/videos/social-1.mp4" },
-    { id: 2, title: "Caso Redes 02", src: "/videos/social-2.mp4" },
-    { id: 3, title: "Caso Redes 03", src: "/videos/social-3.mp4" },
-    { id: 4, title: "Caso Redes 04", src: "/videos/social-4.mp4" },
+  // 1. VIDEOS DE REDES SOCIALES
+  // Tip: Cuando exportes las miniaturas JPG (720x1280) a public/thumbnails/, descomenta la línea poster
+  const socialVideos: VideoItem[] = [
+    { id: 1, title: "Caso Redes 01", src: "/videos/social-1.mp4" /*, poster: "/thumbnails/social-1.jpg" */ },
+    { id: 2, title: "Caso Redes 02", src: "/videos/social-2.mp4" /*, poster: "/thumbnails/social-2.jpg" */ },
+    { id: 3, title: "Caso Redes 03", src: "/videos/social-3.mp4" /*, poster: "/thumbnails/social-3.jpg" */ },
+    { id: 4, title: "Caso Redes 04", src: "/videos/social-4.mp4" /*, poster: "/thumbnails/social-4.jpg" */ },
   ];
 
-  // 2. GALERÍA DE BRANDING / IDENTIDAD (Ajusta las extensiones .jpg / .jpeg / .png según cada archivo)
+  // 2. GALERÍA DE BRANDING / IDENTIDAD
   const identityGallery = [
     { id: 1, title: "Branding & Identidad Visual", client: "Mova", image: "/branding/marca-1.jpg" },
     { id: 2, title: "Sistema Visual Corporativo", client: "Dolce lab", image: "/branding/marca-2.jpg" },
@@ -92,12 +148,12 @@ export default function PortafolioPage() {
     { id: 6, title: "Identidad de Marca", client: "Belidarain", image: "/branding/marca-6.jpg" },
   ];
 
-  // 3. VIDEOS DE EDICIÓN (Ahora con 4 espacios verticales)
-  const editingVideos = [
-    { id: 1, title: "Edición Consein", src: "/videos/edicion-1.mp4" },
-    { id: 2, title: "Color y Etalonaje", src: "/videos/edicion-2.mp4" },
-    { id: 3, title: "Ritmo Visual y Subtítulos", src: "/videos/edicion-3.mp4" },
-    { id: 4, title: "Edición", src: "/videos/edicion-4.mp4" },
+  // 3. VIDEOS DE EDICIÓN
+  const editingVideos: VideoItem[] = [
+    { id: 1, title: "Edición Consein", src: "/videos/edicion-1.mp4" /*, poster: "/thumbnails/edicion-1.jpg" */ },
+    { id: 2, title: "Color y Etalonaje", src: "/videos/edicion-2.mp4" /*, poster: "/thumbnails/edicion-2.jpg" */ },
+    { id: 3, title: "Ritmo Visual y Subtítulos", src: "/videos/edicion-3.mp4" /*, poster: "/thumbnails/edicion-3.jpg" */ },
+    { id: 4, title: "Edición", src: "/videos/edicion-4.mp4" /*, poster: "/thumbnails/edicion-4.jpg" */ },
   ];
 
   return (
@@ -107,7 +163,7 @@ export default function PortafolioPage() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/90 via-black/60 to-transparent backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-5 sm:px-6 h-20 flex items-center justify-between">
           
-          <Link href="/" className="flex items-center z-50" aria-label="Ir al inicio de Ghost Productions">
+          <Link href="/" prefetch={false} className="flex items-center z-50" aria-label="Ir al inicio de Ghost Productions">
             <img
               src="/logo.png"
               alt="Ghost Productions"
@@ -116,19 +172,19 @@ export default function PortafolioPage() {
           </Link>
 
           <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-8 text-sm font-semibold tracking-wider uppercase">
-            <Link href="/" className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">
+            <Link href="/" prefetch={false} className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">
               Home
             </Link>
-            <Link href="/content-day" className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">
+            <Link href="/content-day" prefetch={false} className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">
               Content Day
             </Link>
-            <Link href="/edicion" className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">
+            <Link href="/edicion" prefetch={false} className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">
               Edición
             </Link>
-            <Link href="/portafolio" className="text-white border-b-2 border-[#29ABE2] pb-1 transition-colors">
+            <Link href="/portafolio" prefetch={false} className="text-white border-b-2 border-[#29ABE2] pb-1 transition-colors">
               Portafolio
             </Link>
-            <Link href="/contacto" className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">
+            <Link href="/contacto" prefetch={false} className="text-zinc-300 hover:text-[#29ABE2] pb-1 transition-colors">
               Contacto
             </Link>
           </nav>
@@ -146,11 +202,11 @@ export default function PortafolioPage() {
 
         {isMobileMenuOpen && (
           <nav aria-label="Menú móvil" className="md:hidden bg-[#141414]/98 backdrop-blur-xl border-b border-white/10 px-6 pt-4 pb-8 flex flex-col gap-5 text-center uppercase tracking-widest font-bold text-sm shadow-2xl">
-            <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Home</Link>
-            <Link href="/content-day" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Content Day</Link>
-            <Link href="/edicion" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Edición</Link>
-            <Link href="/portafolio" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-[#29ABE2]">Portafolio</Link>
-            <Link href="/contacto" onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Contacto</Link>
+            <Link href="/" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Home</Link>
+            <Link href="/content-day" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Content Day</Link>
+            <Link href="/edicion" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Edición</Link>
+            <Link href="/portafolio" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-[#29ABE2]">Portafolio</Link>
+            <Link href="/contacto" prefetch={false} onClick={() => setIsMobileMenuOpen(false)} className="py-2 text-zinc-200">Contacto</Link>
           </nav>
         )}
       </header>
@@ -183,13 +239,21 @@ export default function PortafolioPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {socialVideos.map((video) => (
-              <VerticalVideoCard key={video.id} src={video.src} title={video.title} />
-            ))}
+            {socialVideos.map((video) => {
+              const key = `social-${video.id}`;
+              return (
+                <VerticalVideoCard
+                  key={key}
+                  video={video}
+                  isActive={activeVideoKey === key}
+                  onActivate={() => setActiveVideoKey(key)}
+                />
+              );
+            })}
           </div>
         </section>
 
-        {/* ================= BLOQUE 2: BRANDING / IDENTIDAD (Formato libre sin recortar verticales) ================= */}
+        {/* ================= BLOQUE 2: BRANDING / IDENTIDAD ================= */}
         <section aria-labelledby="branding-title" className="mb-24 px-5 sm:px-6 max-w-7xl mx-auto">
           <div className="text-center mb-10">
             <h2 id="branding-title" className="text-2xl sm:text-3xl font-extrabold uppercase tracking-wider text-white">
@@ -207,6 +271,8 @@ export default function PortafolioPage() {
                 <img
                   src={item.image}
                   alt={item.title}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-auto block group-hover:scale-[1.03] transition-transform duration-500"
                 />
 
@@ -223,7 +289,7 @@ export default function PortafolioPage() {
           </div>
         </section>
 
-        {/* ================= BLOQUE 3: EDICIÓN (4 espacios verticales) ================= */}
+        {/* ================= BLOQUE 3: EDICIÓN ================= */}
         <section aria-labelledby="edicion-portafolio-title" className="mb-16 px-5 sm:px-6 max-w-7xl mx-auto">
           <div className="text-center mb-10">
             <h2 id="edicion-portafolio-title" className="text-2xl sm:text-3xl font-extrabold uppercase tracking-wider text-white">
@@ -233,9 +299,17 @@ export default function PortafolioPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {editingVideos.map((video) => (
-              <VerticalVideoCard key={video.id} src={video.src} title={video.title} />
-            ))}
+            {editingVideos.map((video) => {
+              const key = `edicion-${video.id}`;
+              return (
+                <VerticalVideoCard
+                  key={key}
+                  video={video}
+                  isActive={activeVideoKey === key}
+                  onActivate={() => setActiveVideoKey(key)}
+                />
+              );
+            })}
           </div>
         </section>
 
@@ -272,6 +346,7 @@ export default function PortafolioPage() {
             <img
               src="/logo.png"
               alt="Ghost Productions"
+              loading="lazy"
               className="h-9 sm:h-10 w-auto object-contain mx-auto"
             />
           </div>
