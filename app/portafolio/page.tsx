@@ -131,11 +131,12 @@ export default function PortafolioPage() {
 
   // 1. VIDEOS DE REDES SOCIALES
   // Tip: Cuando exportes las miniaturas JPG (720x1280) a public/thumbnails/, descomenta la línea poster
+  // 1. VIDEOS DE REDES SOCIALES
   const socialVideos: VideoItem[] = [
-    { id: 1, title: "Caso Redes 01", src: "/videos/social-1.mp4" /*, poster: "/thumbnails/social-1.jpg" */ },
-    { id: 2, title: "Caso Redes 02", src: "/videos/social-2.mp4" /*, poster: "/thumbnails/social-2.jpg" */ },
-    { id: 3, title: "Caso Redes 03", src: "/videos/social-3.mp4" /*, poster: "/thumbnails/social-3.jpg" */ },
-    { id: 4, title: "Caso Redes 04", src: "/videos/social-4.mp4" /*, poster: "/thumbnails/social-4.jpg" */ },
+    { id: 1, title: "Caso Redes 01", src: "/videos/social-1.mp4", poster: "/thumbnails/social-1.jpg" },
+    { id: 2, title: "Caso Redes 02", src: "/videos/social-2.mp4", poster: "/thumbnails/social-2.jpg" },
+    { id: 3, title: "Caso Redes 03", src: "/videos/social-3.mp4", poster: "/thumbnails/social-3.jpg" },
+    { id: 4, title: "Caso Redes 04", src: "/videos/social-4.mp4", poster: "/thumbnails/social-4.jpg" },
   ];
 
   // 2. GALERÍA DE BRANDING / IDENTIDAD
@@ -149,12 +150,13 @@ export default function PortafolioPage() {
   ];
 
   // 3. VIDEOS DE EDICIÓN
-  const editingVideos: VideoItem[] = [
-    { id: 1, title: "Edición Consein", src: "/videos/edicion-1.mp4" /*, poster: "/thumbnails/edicion-1.jpg" */ },
-    { id: 2, title: "Color y Etalonaje", src: "/videos/edicion-2.mp4" /*, poster: "/thumbnails/edicion-2.jpg" */ },
-    { id: 3, title: "Ritmo Visual y Subtítulos", src: "/videos/edicion-3.mp4" /*, poster: "/thumbnails/edicion-3.jpg" */ },
-    { id: 4, title: "Edición", src: "/videos/edicion-4.mp4" /*, poster: "/thumbnails/edicion-4.jpg" */ },
-  ];
+// 3. VIDEOS DE EDICIÓN
+const editingVideos: VideoItem[] = [
+  { id: 1, title: "Edición Consein", src: "/videos/edicion-1.mp4", poster: "/thumbnails/edicion-1.jpg" },
+  { id: 2, title: "Color y Etalonaje", src: "/videos/edicion-2.mp4", poster: "/thumbnails/edicion-2.jpg" },
+  { id: 3, title: "Ritmo Visual y Subtítulos", src: "/videos/edicion-3.mp4", poster: "/thumbnails/edicion-3.jpg" },
+  { id: 4, title: "Edición", src: "/videos/edicion-4.mp4", poster: "/thumbnails/edicion-4.jpg" },
+];
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[#141414] text-white font-sans selection:bg-[#29ABE2] selection:text-white">
